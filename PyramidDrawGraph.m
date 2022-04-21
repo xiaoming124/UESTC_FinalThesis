@@ -2,7 +2,8 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = 5;
+% SNR = 40;
+
 %% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
@@ -18,73 +19,69 @@ symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt-BW/4).*tt).' ; zeros(wi
 symbol = symbol1 + symbol2 + symbol3;
 
 %% Pyramid
+
+ SNR = 20;
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
 [Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
-figure('position',[500,500,500,500]);
-subplot(211);
-surf(Pyramid_PowerMap);
-axis tight;
-shading interp;
-% view(0, 0);
-title('Pyramid Power Map');
-grid off;
-colorbar;
-hold on;
+figure('Name','Pyramid_PowerMap','position',[0,500,1500,300]);
 
-subplot(212);
+subplot(141);
 surf(Pyramid_PowerMap_Align);
 axis tight;
 shading interp;
 % view(0, 0);
-title('Pyramid Power Map - Aligned');
+title('SNR = 20dB');
 grid off;
-colorbar;
+% colorbar;
 hold on;
-% [Peak, Symb] = max(Pyramid_PowerMap(:,386))
 
-%% DoubleWindow
-tt = 1/fs:1/fs:2*Ts;
-k = BW/Ts;
-window_len = Ts * fs * 2;
-doubleDownchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt).';
+ SNR = 5;
 
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
-[DW_PowerMap, DW_PowerMap_Align, DW_PeakMap] = DoubleWin(collisionPacket, doubleDownchirp, SF, window_len, nfft);
+[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
-figure('position',[1000,500,500,500]);
-subplot(211);
-surf(DW_PowerMap);
+subplot(142);
+surf(Pyramid_PowerMap_Align);
 axis tight;
 shading interp;
 % view(0, 0);
-title('DoubleWindow Power Map');
+title('SNR = 5dB');
 grid off;
-colorbar;
+% colorbar;
 hold on;
 
-subplot(212);
-surf(DW_PowerMap_Align);
+SNR = -5;
+
+collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
+collisionPacket = awgn(collisionPacket, SNR);
+[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
+
+subplot(143);
+surf(Pyramid_PowerMap_Align);
 axis tight;
 shading interp;
 % view(0, 0);
-title('DoubleWindow Power Map - Aligned');
+title('SNR = -5dB');
 grid off;
-colorbar;
+% colorbar;
 hold on;
 
-%% Plot original signal & Peak Map
-figure('position',[0,500,500,500]);
-subplot(311);
-pspectrum(symbol,fs,'spectrogram','OverlapPercent',99,'Leakage',0.85,'MinThreshold',-15,'TimeResolution',0.0001);
-title("Symbol Chirp under Noise");
+SNR = -10;
 
-subplot(312);
-plot(Pyramid_PeakMap);
-title('Pyramid Peak Map');
+collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
+collisionPacket = awgn(collisionPacket, SNR);
+[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
-subplot(313);
-plot(DW_PeakMap);
-title('DoubleWindow Peak Map');
+subplot(144);
+surf(Pyramid_PowerMap_Align);
+axis tight;
+shading interp;
+% view(0, 0);
+title('SNR = -10dB');
+grid off;
+% colorbar;
+hold on;
+
