@@ -23,7 +23,7 @@ symbol = symbol1 + symbol2 + symbol3;
  SNR = 20;
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
-[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
+[~,Pyramid_PowerMap_Align,~] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
 figure('Name','Pyramid_PowerMap','position',[0,500,1500,300]);
 
@@ -41,7 +41,7 @@ hold on;
 
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
-[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
+[~,Pyramid_PowerMap_Align,~] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
 subplot(142);
 surf(Pyramid_PowerMap_Align);
@@ -57,7 +57,7 @@ SNR = -5;
 
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
-[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
+[~,Pyramid_PowerMap_Align,~] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
 subplot(143);
 surf(Pyramid_PowerMap_Align);
@@ -73,7 +73,7 @@ SNR = -10;
 
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
 collisionPacket = awgn(collisionPacket, SNR);
-[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
+[~,Pyramid_PowerMap_Align,~] = Pyramid(collisionPacket, downchirp, SF, window_len, nfft);
 
 subplot(144);
 surf(Pyramid_PowerMap_Align);
