@@ -2,7 +2,7 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = 5;
+SNR = -10;
 %% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
