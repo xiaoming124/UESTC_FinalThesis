@@ -20,9 +20,9 @@ sig = sig1 + sig2;
 SNR = 20;
 sig = awgn(sig, SNR);
 %% Match Filter
-coeff = conj(fliplr(upchirp)); %翻转共轭
+coeff = conj(fliplr(upchirp)); 
 
-pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n)); % 未截取不完全滤波点
+pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n));
 pc_res = flip(pc_res);
 figure;
 subplot(311);
