@@ -1,4 +1,4 @@
-function [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = DoubleWin(collisionPacket, upchirp, doubleDownchirp, SF, double_window_len, nfft)
+function [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = DoubleWin_v2(collisionPacket, upchirp, doubleDownchirp, SF, double_window_len, nfft)
 %DOUBLEWIN 此处显示有关此函数的摘要
 %   此处显示详细说明
     window_len = 2^SF;
@@ -10,7 +10,9 @@ function [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = D
     DW_PowerMap = zeros(2^SF*2, length(collisionPacket) - double_window_len);
     DW_PowerMap_Align = zeros(2^SF*2, length(collisionPacket) - double_window_len);
     DW_PeakMap = zeros(1, length(collisionPacket) - double_window_len);
-    DW_PowerMap_Align_Corr = zeros(2^SF*2,  length(DW_PowerMap_Align(1,:)) + length(upchirp) - 1);
+%     DW_PowerMap_Align_Corr = zeros(2^SF*2,  length(DW_PowerMap_Align(1,:)) + length(upchirp) - 1);
+    DW_PowerMap_Align_Corr = zeros(2^SF*2,  length(DW_PowerMap_Align(1,:)));
+    downchirps = repmat(doubleDownchirp, 1, length(DW_PowerMap_Align(1,:))/length(doubleDownchirp));
     % Fbin_Align = zeros(2^SF*2,1);
 
     for ii = 1:length(collisionPacket) - double_window_len
@@ -37,7 +39,9 @@ function [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = D
     for ii = 1 : 2^SF*2
 %             tmp = xcorr(DW_PowerMap_Align(ii,:), Power_Distribution);
 %             DW_PowerMap_Align_Corr(ii,:) = tmp;
-                DW_PowerMap_Align_Corr(ii,:) = abs(conv(DW_PowerMap_Align(ii,:),fft(upchirp)));
+%                 DW_PowerMap_Align_Corr(ii,:) = abs(conv(DW_PowerMap_Align(ii,:),fft(upchirp)));
+                DW_PowerMap_Align_Corr(ii,:) = (DW_PowerMap_Align(ii,:).*downchirps);
+
     end
 
 end

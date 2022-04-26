@@ -2,25 +2,26 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = 40;
+SNR = -5;
 %% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
 k = BW/Ts;
 window_len = Ts * fs;
 nfft = 2^SF;
-downchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt).';
-upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt).';
+downchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt);
+upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
 symbol1 = [exp(1j*2*pi*(k*0.5*tt-BW*3/8).*tt).' ; zeros(window_len,1)];
 symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt).*tt).'];
-symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt-BW/4).*tt).' ; zeros(window_len/2,1)];
+symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).' ; zeros(window_len/2,1)];
 symbol = symbol1 + symbol2 + symbol3;
+% symbol = symbol1;
 
 %Peak Location: (33,257) (129,512) (193,385)
 
 %% Pyramid
-collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)];
+collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)].';
 collisionPacket = awgn(collisionPacket, SNR);
 [Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap, Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, SF, window_len, nfft);
 
@@ -46,7 +47,7 @@ colorbar;
 hold on;
 
 subplot(313);
-surf(db(Pyramid_PowerMap_Align_Corr));
+surf(abs(Pyramid_PowerMap_Align_Corr));
 axis tight;
 shading interp;
 % view(0, 0);
@@ -54,6 +55,7 @@ title('Pyramid Power Map - Accumulated');
 grid off;
 colorbar;
 hold on;
+
 
 disp("Pyramid Decode Result");
 disp("Ground Truth:Peak Location: (33,257) (129,512) (193,385)");
@@ -73,9 +75,9 @@ disp(["Aligned_Freq" 193 "Peak_Time" time]);
 tt = 1/fs:1/fs:2*Ts;
 k = BW/Ts;
 Double_window_len = Ts * fs * 2;
-doubleDownchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt).';
+doubleDownchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
-collisionPacket = [zeros(Double_window_len,1);symbol;zeros(Double_window_len,1)];
+collisionPacket = [zeros(Double_window_len,1);symbol;zeros(Double_window_len,1)].';
 collisionPacket = awgn(collisionPacket, SNR);
 [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = DoubleWin_v2(collisionPacket, upchirp, doubleDownchirp, SF, Double_window_len, nfft);
 
@@ -116,7 +118,7 @@ hold on;
 
 subplot(313);
 % surf(DW_PowerMap_Align_Accumulate);
-surf(db(DW_PowerMap_Align_Corr));
+surf(abs(DW_PowerMap_Align_Corr));
 axis tight;
 shading interp;
 % view(0, 0);
@@ -140,9 +142,38 @@ disp("Ground Truth:Peak Location: (66,257) (258,512) (386,385)");
 [~, time] = max(DW_PowerMap_Align_Corr(66,:));
 disp(["Aligned_Freq" 66 "Peak_Time" time]);
 [~, time] = max(DW_PowerMap_Align_Corr(258,:));
-disp(["Aligned_Freq" 258 "Peak_Time" time]); %Continue Symbol need "-1" (discovered by examination)
+disp(["Aligned_Freq" 258 "Peak_Time" time]);
 [~, time] = max(DW_PowerMap_Align_Corr(386,:));
 disp(["Aligned_Freq" 386 "Peak_Time" time]);
+
+
+% xx = DW_PowerMap_Align_Corr(130, 518:518+255);
+%  xx = Pyramid_PowerMap_Align_Corr(33, :);
+xx = DW_PowerMap_Align_Corr(130, :);
+FinalMap = zeros(1, length(xx));
+FinalMap2 = zeros(1, length(xx));
+for ii = 1:length(xx) - window_len
+    [peak , loc] = max(abs(fft(xx(ii:ii+window_len))));
+    FinalMap(ii) = peak;
+    FinalMap2(ii) = loc;
+end
+% xx = Pyramid_PowerMap_Align_Corr(33, 1:512);
+figure;
+plot(FinalMap);
+figure;
+plot(FinalMap2);
+[~, time] = max(FinalMap);
+disp([ time]);
+% pspectrum(xx,250e3,'spectrogram','OverlapPercent',99,'Leakage',0.85,'MinThreshold',-15,'TimeResolution',0.0001);
+% figure;hold on;
+% % plot(phase(ifft(xx)));
+% plot(phase(upchirp));
+% 
+% % plot(abs(fft(downchirp)));
+% plot(phase(fft(upchirp)));
+% legend('time domain phase','frequency domain phase');
+
+
 
 % figure;
 % plot(DW_PowerMap_Align_Corr(55,:));
