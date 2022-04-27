@@ -2,7 +2,7 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = -5;
+SNR = 10;
 %% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
@@ -13,7 +13,7 @@ downchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt);
 upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
 symbol1 = [exp(1j*2*pi*(k*0.5*tt-BW*3/8).*tt).' ; zeros(window_len,1)];
-symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt).*tt).'];
+symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).'];
 symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).' ; zeros(window_len/2,1)];
 symbol = symbol1 + symbol2 + symbol3;
 % symbol = symbol1;
@@ -47,7 +47,7 @@ colorbar;
 hold on;
 
 subplot(313);
-surf(abs(Pyramid_PowerMap_Align_Corr));
+surf((Pyramid_PowerMap_Align_Corr));
 axis tight;
 shading interp;
 % view(0, 0);
@@ -94,38 +94,38 @@ collisionPacket = awgn(collisionPacket, SNR);
 %         DW_PowerMap_Align_Corr(ii,:) = xcorr(DW_PowerMap_Align(ii,:), Power_Distribution)(:,768:end);
 % end
 
-figure('position',[1000,500,500,500]);
-subplot(311);
-surf(abs(DW_PowerMap));
-axis tight;
-shading interp;
-% view(0, 0);
-title('DoubleWindow Power Map');
-grid off;
-colorbar;
-hold on;
-
-subplot(312);
-surf(abs(DW_PowerMap_Align));
-axis tight;
-shading interp;
-% view(0, 0);
-title('DoubleWindow Power Map - Aligned');
-grid off;
-colorbar;
-hold on;
-
-
-subplot(313);
-% surf(DW_PowerMap_Align_Accumulate);
-surf(abs(DW_PowerMap_Align_Corr));
-axis tight;
-shading interp;
-% view(0, 0);
-title('DoubleWindow Power Map - Accumulated');
-grid off;
-colorbar;
-hold on;
+% figure('position',[1000,500,500,500]);
+% subplot(311);
+% surf(abs(DW_PowerMap));
+% axis tight;
+% shading interp;
+% % view(0, 0);
+% title('DoubleWindow Power Map');
+% grid off;
+% colorbar;
+% hold on;
+% 
+% subplot(312);
+% surf(abs(DW_PowerMap_Align));
+% axis tight;
+% shading interp;
+% % view(0, 0);
+% title('DoubleWindow Power Map - Aligned');
+% grid off;
+% colorbar;
+% hold on;
+% 
+% 
+% subplot(313);
+% % surf(DW_PowerMap_Align_Accumulate);
+% surf(abs(DW_PowerMap_Align_Corr));
+% axis tight;
+% shading interp;
+% % view(0, 0);
+% title('DoubleWindow Power Map - Accumulated');
+% grid off;
+% colorbar;
+% hold on;
 
 % disp("DoubleWindow Decode Result");
 % disp("Ground Truth:Peak Location: (64,257) (256,512) (383,385)");
@@ -149,45 +149,57 @@ disp(["Aligned_Freq" 386 "Peak_Time" time]);
 
 % xx = DW_PowerMap_Align_Corr(130, 518:518+255);
 %  xx = Pyramid_PowerMap_Align_Corr(33, :);
-xx = DW_PowerMap_Align_Corr(130, :);
-FinalMap = zeros(1, length(xx));
-FinalMap2 = zeros(1, length(xx));
-for ii = 1:length(xx) - window_len
-    [peak , loc] = max(abs(fft(xx(ii:ii+window_len))));
-    FinalMap(ii) = peak;
-    FinalMap2(ii) = loc;
-end
-% xx = Pyramid_PowerMap_Align_Corr(33, 1:512);
-figure;
-plot(FinalMap);
-figure;
-plot(FinalMap2);
-[~, time] = max(FinalMap);
-disp([ time]);
-% pspectrum(xx,250e3,'spectrogram','OverlapPercent',99,'Leakage',0.85,'MinThreshold',-15,'TimeResolution',0.0001);
-% figure;hold on;
-% % plot(phase(ifft(xx)));
-% plot(phase(upchirp));
-% 
-% % plot(abs(fft(downchirp)));
-% plot(phase(fft(upchirp)));
-% legend('time domain phase','frequency domain phase');
+xx = Pyramid_PowerMap_Align(33, :);
+% xx = DW_PowerMap_Align_Corr(66, :);
 
-
+% FinalMap = zeros(1, length(xx));
+% FinalMap2 = zeros(1, length(xx));
+% for ii = 1:length(xx) - window_len
+%     [peak , loc] = max(abs(fft(xx(ii:ii+window_len))));
+%     FinalMap(ii) = peak;
+%     FinalMap2(ii) = loc;
+% end
+% % xx = Pyramid_PowerMap_Align_Corr(33, 1:512);
+% figure;
+% plot(FinalMap);
+% figure;
+% plot(FinalMap2);
+% [~, time] = max(FinalMap);
+% disp([ time]);
 
 % figure;
-% plot(DW_PowerMap_Align_Corr(55,:));
+% plot(abs(xx))
+tt = 1/fs:1/fs:Ts;
+chirpList = zeros(1, 256);
+num = 0;
+symbol4 = [exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) zeros(1,256)];
+for ii = 1:256
+    yy = symbol4(ii:ii+255) .* downchirp;
+    tmp = fft(yy);
+    chirpList(ii) = tmp(mod(ii+num-1,256)+1);
+end
+figure;
+subplot(211);
+plot(abs(chirpList));
+subplot(212);
+plot(angle(chirpList));
 
-%% Plot original signal & Peak Map
-% figure('position',[0,500,500,500]);
-% subplot(311);
-% pspectrum(symbol,fs,'spectrogram','OverlapPercent',99,'Leakage',0.85,'MinThreshold',-15,'TimeResolution',0.0001);
-% title("Symbol Chirp under Noise");
-% 
-% subplot(312);
-% plot(Pyramid_PeakMap);
-% title('Pyramid Peak Map');
-% 
-% subplot(313);
-% plot(DW_PeakMap);
-% title('DoubleWindow Peak Map');
+figure;
+plot(angle(symbol4(1:256)));
+
+% figure;hold on;
+% plot(phase(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt)));
+% plot(phase(fft(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt))));
+% legend('time','freq');
+
+
+tt = 1:256;
+zz = exp(1j*1/16*pi.*tt);
+figure;
+subplot(211);
+plot(abs(fft(zz)));
+subplot(212);
+plot(angle(fft(zz)));
+
+
+

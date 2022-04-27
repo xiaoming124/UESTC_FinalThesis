@@ -2,10 +2,10 @@ function [DW_PowerMap, DW_PowerMap_Align, DW_PeakMap,DW_PowerMap_Align_Corr] = D
 %DOUBLEWIN 此处显示有关此函数的摘要
 %   此处显示详细说明
     window_len = 2^SF;
-    Power_Distribution = zeros(1, window_len);
-    Power_Distribution(1 : window_len) = 1 : window_len;
-    Power_Distribution(window_len : window_len * 2) = window_len;
-    Power_Distribution(window_len * 2 + 1 : window_len * 3) = window_len : -1 :1;
+%     Power_Distribution = zeros(1, window_len);
+%     Power_Distribution(1 : window_len) = 1 : window_len;
+%     Power_Distribution(window_len : window_len * 2) = window_len;
+%     Power_Distribution(window_len * 2 + 1 : window_len * 3) = window_len : -1 :1;
     
     DW_PowerMap = zeros(2^SF*2, length(collisionPacket) - double_window_len);
     DW_PowerMap_Align = zeros(2^SF*2, length(collisionPacket) - double_window_len);

@@ -1,10 +1,18 @@
 function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, SF, window_len, nfft)
 %UNTITLED 此处显示有关此函数的摘要
 %   此处显示详细说明
+
+    Power_Distribution = zeros(1, window_len*2);
+    Power_Distribution(1 : window_len) = 1 : window_len;
+    Power_Distribution(window_len + 1 : window_len * 2) = window_len - 1 : -1 :0;
+    coeff = Power_Distribution .* [upchirp upchirp];
+    coeff = conj(fliplr(coeff)); 
+
     Pyramid_PowerMap = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PowerMap_Align = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PeakMap = zeros(1, length(collisionPacket) - window_len);
-    Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)));
+    Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)) + length(coeff) - 1);
+%     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)));
     Fbin_Align = zeros(2^SF,1);
     downchirps = repmat(downchirp, 1, length(Pyramid_PowerMap_Align(1,:))/length(downchirp));
     
@@ -25,9 +33,9 @@ function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_Powe
     end
     
     for ii = 1 : 2^SF
-%                 Pyramid_PowerMap_Align_Corr(ii,:) = abs(conv(Pyramid_PowerMap_Align(ii,:),fft(upchirp)));
+                Pyramid_PowerMap_Align_Corr(ii,:) = abs(conv(Pyramid_PowerMap_Align(ii,:),coeff));
 %                 Pyramid_PowerMap_Align_Corr(ii,:) = abs(ifft(Pyramid_PowerMap_Align(ii,:).*fft(upchirp)));
-                 Pyramid_PowerMap_Align_Corr(ii,:) = (Pyramid_PowerMap_Align(ii,:).*downchirps);
+%                  Pyramid_PowerMap_Align_Corr(ii,:) = (Pyramid_PowerMap_Align(ii,:).*downchirps);
     end
     
 end
