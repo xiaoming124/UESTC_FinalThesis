@@ -57,14 +57,14 @@ colorbar;
 hold on;
 
 
-disp("Pyramid Decode Result");
-disp("Ground Truth:Peak Location: (33,257) (129,512) (193,385)");
-[~, time] = max(Pyramid_PowerMap_Align(33,:));
-disp(["Aligned_Freq" 33 "Peak_Time" time]);
-[~, time] = max(Pyramid_PowerMap_Align(129,:));
-disp(["Aligned_Freq" 129 "Peak_Time" time]);
-[~, time] = max(Pyramid_PowerMap_Align(193,:));
-disp(["Aligned_Freq" 193 "Peak_Time" time]);
+% disp("Pyramid Decode Result");
+% disp("Ground Truth:Peak Location: (33,257) (129,512) (193,385)");
+% [~, time] = max(Pyramid_PowerMap_Align(33,:));
+% disp(["Aligned_Freq" 33 "Peak_Time" time]);
+% [~, time] = max(Pyramid_PowerMap_Align(129,:));
+% disp(["Aligned_Freq" 129 "Peak_Time" time]);
+% [~, time] = max(Pyramid_PowerMap_Align(193,:));
+% disp(["Aligned_Freq" 193 "Peak_Time" time]);
 
 %% DoubleWindow
 % Power_Distribution = zeros(1, window_len);
@@ -136,15 +136,15 @@ collisionPacket = awgn(collisionPacket, SNR);
 % [~, time] = max(DW_PowerMap_Align_Accumulate(383,:));
 % disp(["Aligned_Freq" 384 "Peak_Time" time]);
 
-
-disp("DoubleWindow Decode Result");
-disp("Ground Truth:Peak Location: (66,257) (258,512) (386,385)");
-[~, time] = max(DW_PowerMap_Align_Corr(66,:));
-disp(["Aligned_Freq" 66 "Peak_Time" time]);
-[~, time] = max(DW_PowerMap_Align_Corr(258,:));
-disp(["Aligned_Freq" 258 "Peak_Time" time]);
-[~, time] = max(DW_PowerMap_Align_Corr(386,:));
-disp(["Aligned_Freq" 386 "Peak_Time" time]);
+% 
+% disp("DoubleWindow Decode Result");
+% disp("Ground Truth:Peak Location: (66,257) (258,512) (386,385)");
+% [~, time] = max(DW_PowerMap_Align_Corr(66,:));
+% disp(["Aligned_Freq" 66 "Peak_Time" time]);
+% [~, time] = max(DW_PowerMap_Align_Corr(258,:));
+% disp(["Aligned_Freq" 258 "Peak_Time" time]);
+% [~, time] = max(DW_PowerMap_Align_Corr(386,:));
+% disp(["Aligned_Freq" 386 "Peak_Time" time]);
 
 
 % xx = DW_PowerMap_Align_Corr(130, 518:518+255);
@@ -182,10 +182,10 @@ figure;
 subplot(211);
 plot(abs(chirpList));
 subplot(212);
-plot(angle(chirpList));
+plot(phase(chirpList));
 
 figure;
-plot(angle(symbol4(1:256)));
+plot(phase(symbol4(1:256)));
 
 % figure;hold on;
 % plot(phase(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt)));
@@ -193,13 +193,16 @@ plot(angle(symbol4(1:256)));
 % legend('time','freq');
 
 
-tt = 1:256;
-zz = exp(1j*1/16*pi.*tt);
+% zz = exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) .* downchirp;
+tt = 0:255;
+zz = exp(1j*pi/4*tt);
+zz2 = angle(fft(zz));
 figure;
 subplot(211);
 plot(abs(fft(zz)));
 subplot(212);
 plot(angle(fft(zz)));
 
+disp(zz2(num+1));
 
 
