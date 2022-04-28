@@ -172,8 +172,8 @@ xx = Pyramid_PowerMap_Align(33, :);
 tt = 1/fs:1/fs:Ts;
 chirpList = zeros(1, 256);
 num = 0;
-symbol4 = [exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) zeros(1,256)];
-for ii = 1:256
+symbol4 = [zeros(1,256) exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) zeros(1,256)];
+for ii = 1:512
     yy = symbol4(ii:ii+255) .* downchirp;
     tmp = fft(yy);
     chirpList(ii) = tmp(mod(ii+num-1,256)+1);
@@ -184,8 +184,8 @@ plot(abs(chirpList));
 subplot(212);
 plot(phase(chirpList));
 
-figure;
-plot(phase(symbol4(1:256)));
+% figure;
+% plot(phase(symbol4(1:256)));
 
 % figure;hold on;
 % plot(phase(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt)));
@@ -194,15 +194,15 @@ plot(phase(symbol4(1:256)));
 
 
 % zz = exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) .* downchirp;
-tt = 0:255;
-zz = exp(1j*pi/4*tt);
-zz2 = angle(fft(zz));
-figure;
-subplot(211);
-plot(abs(fft(zz)));
-subplot(212);
-plot(angle(fft(zz)));
-
-disp(zz2(num+1));
+% tt = 0:255;
+% zz = exp(1j*pi/4*tt);
+% zz2 = angle(fft(zz));
+% figure;
+% subplot(211);
+% plot(abs(fft(zz)));
+% subplot(212);
+% plot(angle(fft(zz)));
+% 
+% disp(zz2(33));
 
 
