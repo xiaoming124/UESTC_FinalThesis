@@ -2,7 +2,7 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = 10;
+SNR = 20;
 %% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
@@ -14,7 +14,7 @@ upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
 symbol1 = [exp(1j*2*pi*(k*0.5*tt-BW*3/8).*tt).' ; zeros(window_len,1)];
 symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).'];
-symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).' ; zeros(window_len/2,1)];
+symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt-BW/2).*tt).' ; zeros(window_len/2,1)];
 symbol = symbol1 + symbol2 + symbol3;
 % symbol = symbol1;
 
@@ -114,10 +114,10 @@ collisionPacket = awgn(collisionPacket, SNR);
 % grid off;
 % colorbar;
 % hold on;
-% 
-% 
+% % 
+% % 
 % subplot(313);
-% % surf(DW_PowerMap_Align_Accumulate);
+% surf(DW_PowerMap_Align_Accumulate);
 % surf(abs(DW_PowerMap_Align_Corr));
 % axis tight;
 % shading interp;
@@ -146,53 +146,87 @@ collisionPacket = awgn(collisionPacket, SNR);
 % [~, time] = max(DW_PowerMap_Align_Corr(386,:));
 % disp(["Aligned_Freq" 386 "Peak_Time" time]);
 
+%% MatchFilter - Accumulate at Time Domain
+% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
+% coeff = conj(fliplr(upchirp)); 
+% FinalMap = zeros(1, length(xx));
+% pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n));
+% 
+% for ii = 1:256:length(xx)
+%     yy = ifft(fft(xx(ii:ii+window_len - 1)).*fft(coeff));
+%     FinalMap(ii:ii+window_len - 1) = yy;
+% end
+% 
+% figure;
+% plot(abs(FinalMap));
 
+%% Plot PowerMap_Align
+% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
+% figure;
+% plot(abs(Pyramid_PowerMap_Align_Corr(129, :)))
+% 
+% figure;
+% plot(abs(xx));
+
+%% Dechirp - Accumulate at Freq Domain
 % xx = DW_PowerMap_Align_Corr(130, 518:518+255);
 %  xx = Pyramid_PowerMap_Align_Corr(33, :);
-xx = Pyramid_PowerMap_Align(33, :);
+% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
 % xx = DW_PowerMap_Align_Corr(66, :);
+
 
 % FinalMap = zeros(1, length(xx));
 % FinalMap2 = zeros(1, length(xx));
+% FinalMap3 = zeros(1, length(xx));
 % for ii = 1:length(xx) - window_len
-%     [peak , loc] = max(abs(fft(xx(ii:ii+window_len))));
+%     yy = (fft(xx(ii:ii+window_len - 1) .* downchirp));
+%     [peak , loc] = max(abs(yy));
 %     FinalMap(ii) = peak;
 %     FinalMap2(ii) = loc;
+%     yy1 = phase(yy);
+%     FinalMap3(ii) = yy1(loc);
 % end
 % % xx = Pyramid_PowerMap_Align_Corr(33, 1:512);
 % figure;
 % plot(FinalMap);
 % figure;
 % plot(FinalMap2);
+% figure;
+% plot(FinalMap3);
+% 
 % [~, time] = max(FinalMap);
+% 
 % disp([ time]);
-
+% 
 % figure;
 % plot(abs(xx))
-tt = 1/fs:1/fs:Ts;
-chirpList = zeros(1, 256);
-num = 0;
-symbol4 = [zeros(1,256) exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) zeros(1,256)];
-for ii = 1:512
-    yy = symbol4(ii:ii+255) .* downchirp;
-    tmp = fft(yy);
-    chirpList(ii) = tmp(mod(ii+num-1,256)+1);
-end
-figure;
-subplot(211);
-plot(abs(chirpList));
-subplot(212);
-plot(phase(chirpList));
 
+
+%% Power Phase Variation
+% tt = 1/fs:1/fs:Ts;
+% chirpList = zeros(1, 256);
+% num = 0;
+% symbol4 = [zeros(1,256) exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) zeros(1,256)];
+% for ii = 1:512
+%     yy = symbol4(ii:ii+255) .* downchirp;
+%     tmp = fft(yy);
+%     chirpList(ii) = tmp(mod(ii+num-1,256)+1);
+% end
+% figure;
+% subplot(211);
+% plot(abs(chirpList));
+% subplot(212);
+% plot(phase(chirpList));
+% 
+% 
 % figure;
 % plot(phase(symbol4(1:256)));
-
+% 
 % figure;hold on;
 % plot(phase(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt)));
 % plot(phase(fft(exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt))));
 % legend('time','freq');
-
-
+% 
 % zz = exp(1j*2*pi*(k*0.5*tt-BW/2+BW*num/256).*tt) .* downchirp;
 % tt = 0:255;
 % zz = exp(1j*pi/4*tt);

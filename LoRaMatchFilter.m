@@ -9,8 +9,8 @@ fft_n = 2^SF;
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
 k = BW/Ts;
-symbol1 = 128;
-symbol2 = 250;
+symbol1 = 0;
+symbol2 = 128;
 downchirp = exp(-1j*2*pi*(k*0.5*tt-BW/2).*tt).';
 upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt).';
 
@@ -23,7 +23,7 @@ sig = awgn(sig, SNR);
 coeff = conj(fliplr(upchirp)); 
 
 pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n));
-pc_res = flip(pc_res);
+% pc_res = flip(pc_res);
 figure;
 subplot(311);
 pspectrum(sig,fs,'spectrogram','OverlapPercent',99,'Leakage',0.85,'MinThreshold',-15,'TimeResolution',0.0001);
