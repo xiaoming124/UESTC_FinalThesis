@@ -3,7 +3,7 @@ fs = 250e3;
 SF = 8;
 BW = 250e3;
 SNR = 20;
-%% Generate Symbol and Downchirp
+%% Gene10ate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
 k = BW/Ts;
@@ -14,7 +14,7 @@ upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
 symbol1 = [exp(1j*2*pi*(k*0.5*tt-BW*3/8).*tt).' ; zeros(window_len,1)];
 symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).'];
-symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt-BW/2).*tt).' ; zeros(window_len/2,1)];
+symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt).*tt).' ; zeros(window_len/2,1)];
 symbol = symbol1 + symbol2 + symbol3;
 % symbol = symbol1;
 
@@ -23,7 +23,7 @@ symbol = symbol1 + symbol2 + symbol3;
 %% Pyramid
 collisionPacket = [zeros(window_len,1);symbol;zeros(window_len,1)].';
 collisionPacket = awgn(collisionPacket, SNR);
-[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap, Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, SF, window_len, nfft);
+[Pyramid_PowerMap,Pyramid_PowerMap_Align,Pyramid_PeakMap, Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, BW, SF, window_len, nfft);
 
 figure('position',[500,500,500,500]);
 subplot(311);
@@ -147,10 +147,10 @@ collisionPacket = awgn(collisionPacket, SNR);
 % disp(["Aligned_Freq" 386 "Peak_Time" time]);
 
 %% MatchFilter - Accumulate at Time Domain
-% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
+% xx = [Pyramid_PowerMap_Align(1, :) zeros(1,256)];
 % coeff = conj(fliplr(upchirp)); 
 % FinalMap = zeros(1, length(xx));
-% pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n));
+% % pc_res = ifft(fft(sig,fft_n).*fft(coeff,fft_n));
 % 
 % for ii = 1:256:length(xx)
 %     yy = ifft(fft(xx(ii:ii+window_len - 1)).*fft(coeff));
@@ -161,12 +161,12 @@ collisionPacket = awgn(collisionPacket, SNR);
 % plot(abs(FinalMap));
 
 %% Plot PowerMap_Align
-% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
-% figure;
-% plot(abs(Pyramid_PowerMap_Align_Corr(129, :)))
-% 
-% figure;
-% plot(abs(xx));
+xx = [Pyramid_PowerMap_Align(1, :) zeros(1,256)];
+figure;
+plot(abs(Pyramid_PowerMap_Align_Corr(1, :)))
+
+figure;
+plot(abs(xx));
 
 %% Dechirp - Accumulate at Freq Domain
 % xx = DW_PowerMap_Align_Corr(130, 518:518+255);

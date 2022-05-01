@@ -1,20 +1,23 @@
-function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, SF, window_len, nfft)
+function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_PowerMap_Align_Corr] = Pyramid_v2(collisionPacket, upchirp, downchirp, BW,SF, window_len, nfft)
 %UNTITLED 此处显示有关此函数的摘要
 %   此处显示详细说明
 
-    Power_Distribution = zeros(1, window_len*2);
-    Power_Distribution(1 : window_len) = 1 : window_len;
-    Power_Distribution(window_len + 1 : window_len * 2) = window_len - 1 : -1 :0;
-    coeff = Power_Distribution .* [upchirp upchirp];
+%     Power_Distribution = zeros(1, window_len*2);
+%     Power_Distribution(1 : window_len) = 1 : window_len;
+%     Power_Distribution(window_len + 1 : window_len * 2) = window_len - 1 : -1 :0;
+%     coeff = Power_Distribution .* [upchirp upchirp];
+    fs = 250e3;
+    Ts = (2^SF)/BW;
+    tt = 1/fs:1/fs:Ts;
+    coeff = upchirp .* exp(1j*2*pi*(129*BW/256).*tt);
     coeff = conj(fliplr(coeff)); 
-
     Pyramid_PowerMap = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PowerMap_Align = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PeakMap = zeros(1, length(collisionPacket) - window_len);
     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)) + length(coeff) - 1);
 %     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)));
     Fbin_Align = zeros(2^SF,1);
-    downchirps = repmat(downchirp, 1, length(Pyramid_PowerMap_Align(1,:))/length(downchirp));
+%     downchirps = repmat(downchirp, 1, length(Pyramid_PowerMap_Align(1,:))/length(downchirp));
     
 
     for ii = 1:length(collisionPacket) - window_len
