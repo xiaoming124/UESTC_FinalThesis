@@ -2,8 +2,8 @@ close all;clc;
 fs = 250e3;
 SF = 8;
 BW = 250e3;
-SNR = 20;
-%% Gene10ate Symbol and Downchirp
+SNR = -10;
+%% Generate Symbol and Downchirp
 Ts = (2^SF)/BW;
 tt = 1/fs:1/fs:Ts;
 k = BW/Ts;
@@ -14,7 +14,7 @@ upchirp = exp(1j*2*pi*(k*0.5*tt-BW/2).*tt);
 
 symbol1 = [exp(1j*2*pi*(k*0.5*tt-BW*3/8).*tt).' ; zeros(window_len,1)];
 symbol2 = [zeros(window_len,1) ; exp(1j*2*pi*(k*0.5*tt+BW/4).*tt).'];
-symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt).*tt).' ; zeros(window_len/2,1)];
+symbol3 = [zeros(window_len/2,1) ; exp(1j*2*pi*(k*0.5*tt-BW/2).*tt).' ; zeros(window_len/2,1)];
 symbol = symbol1 + symbol2 + symbol3;
 % symbol = symbol1;
 
@@ -94,26 +94,26 @@ collisionPacket = awgn(collisionPacket, SNR);
 %         DW_PowerMap_Align_Corr(ii,:) = xcorr(DW_PowerMap_Align(ii,:), Power_Distribution)(:,768:end);
 % end
 
-% figure('position',[1000,500,500,500]);
-% subplot(311);
-% surf(abs(DW_PowerMap));
-% axis tight;
-% shading interp;
-% % view(0, 0);
-% title('DoubleWindow Power Map');
-% grid off;
-% colorbar;
-% hold on;
-% 
-% subplot(312);
-% surf(abs(DW_PowerMap_Align));
-% axis tight;
-% shading interp;
-% % view(0, 0);
-% title('DoubleWindow Power Map - Aligned');
-% grid off;
-% colorbar;
-% hold on;
+figure('position',[1000,500,500,500]);
+subplot(311);
+surf(abs(DW_PowerMap));
+axis tight;
+shading interp;
+% view(0, 0);
+title('DoubleWindow Power Map');
+grid off;
+colorbar;
+hold on;
+
+subplot(312);
+surf(abs(DW_PowerMap_Align));
+axis tight;
+shading interp;
+% view(0, 0);
+title('DoubleWindow Power Map - Aligned');
+grid off;
+colorbar;
+hold on;
 % % 
 % % 
 % subplot(313);
@@ -161,20 +161,24 @@ collisionPacket = awgn(collisionPacket, SNR);
 % plot(abs(FinalMap));
 
 %% Plot PowerMap_Align
-xx = [Pyramid_PowerMap_Align(1, :) zeros(1,256)];
+xx = [Pyramid_PowerMap_Align(33, :) zeros(1,256)];
 figure;
-plot(abs(Pyramid_PowerMap_Align_Corr(1, :)))
+plot(abs(Pyramid_PowerMap_Align_Corr(33, :)))
 
 figure;
 plot(abs(xx));
 
+yy = xx(1:512);
+figure;
+plot(abs(fft(yy.*[downchirp downchirp])));
+
 %% Dechirp - Accumulate at Freq Domain
 % xx = DW_PowerMap_Align_Corr(130, 518:518+255);
-%  xx = Pyramid_PowerMap_Align_Corr(33, :);
-% xx = [Pyramid_PowerMap_Align(129, :) zeros(1,256)];
+% xx = Pyramid_PowerMap_Align_Corr(33, :);
+% xx = [Pyramid_PowerMap_Align(1, :) zeros(1,256)];
 % xx = DW_PowerMap_Align_Corr(66, :);
-
-
+% 
+% 
 % FinalMap = zeros(1, length(xx));
 % FinalMap2 = zeros(1, length(xx));
 % FinalMap3 = zeros(1, length(xx));

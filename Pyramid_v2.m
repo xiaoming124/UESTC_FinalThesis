@@ -10,12 +10,13 @@ function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_Powe
     Ts = (2^SF)/BW;
     tt = 1/fs:1/fs:Ts;
     coeff = upchirp .* exp(1j*2*pi*(129*BW/256).*tt);
+%     coeff = upchirp;
     coeff = conj(fliplr(coeff)); 
     Pyramid_PowerMap = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PowerMap_Align = zeros(2^SF, length(collisionPacket) - window_len);
     Pyramid_PeakMap = zeros(1, length(collisionPacket) - window_len);
     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)) + length(coeff) - 1);
-%     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)));
+%     Pyramid_PowerMap_Align_Corr = zeros(2^SF,  length(Pyramid_PowerMap_Align(1,:)) - 256);
     Fbin_Align = zeros(2^SF,1);
 %     downchirps = repmat(downchirp, 1, length(Pyramid_PowerMap_Align(1,:))/length(downchirp));
     
@@ -36,6 +37,11 @@ function [Pyramid_PowerMap, Pyramid_PowerMap_Align, Pyramid_PeakMap,Pyramid_Powe
     end
     
     for ii = 1 : 2^SF
+%         for jj = 1:length(Pyramid_PowerMap_Align(ii,:)) - window_len
+%             yy = (fft(Pyramid_PowerMap_Align(ii,jj:jj+window_len - 1) .* downchirp));
+%             [peak , ~] = max(abs(yy));
+%             Pyramid_PowerMap_Align_Corr(ii,jj) = peak;
+%         end
                 Pyramid_PowerMap_Align_Corr(ii,:) = abs(conv(Pyramid_PowerMap_Align(ii,:),coeff));
 %                 Pyramid_PowerMap_Align_Corr(ii,:) = abs(ifft(Pyramid_PowerMap_Align(ii,:).*fft(upchirp)));
 %                  Pyramid_PowerMap_Align_Corr(ii,:) = (Pyramid_PowerMap_Align(ii,:).*downchirps);
